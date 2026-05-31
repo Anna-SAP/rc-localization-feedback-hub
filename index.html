@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Localization Feedback Hub - Public Demo</title>
+<style>
+  :root{
+    --rc-orange:#FF6F00; --rc-orange-d:#E25E00; --rc-orange-soft:#FFF3E8;
+    --ink:#1B2030; --ink-2:#4A5266; --ink-3:#7A8194;
+    --bg:#F4F6F9; --card:#FFFFFF; --line:#E6E9F0; --line-2:#EEF1F6;
+    --blue:#2563EB; --blue-soft:#EAF1FE; --green:#15A150; --green-soft:#E7F6EE;
+    --amber:#C77700; --amber-soft:#FCF3E2; --red:#D64545; --red-soft:#FBEBEB;
+    --shadow:0 1px 2px rgba(20,30,60,.06),0 4px 16px rgba(20,30,60,.06);
+    --shadow-lg:0 8px 32px rgba(20,30,60,.12); --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  header{background:linear-gradient(110deg,#1B2030 0%,#2A2140 60%,#3A2410 100%);color:#fff;padding:20px 0 0}
+  .topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px}
+  .logo .dot{width:30px;height:30px;border-radius:8px;background:var(--rc-orange);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 10px rgba(255,111,0,.5)}
+  .badge-demo{font-size:11px;font-weight:700;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 9px;border-radius:999px;letter-spacing:.5px}
+  .sub{color:#C7CCDA;font-size:13px;margin:6px 0 16px;max-width:760px}
+  .spacer{flex:1}
+  .hbtns{display:flex;gap:9px}
+  .hbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:#fff;padding:8px 13px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+  .hbtn:hover{background:rgba(255,255,255,.2)}
+  .hbtn.primary{background:var(--rc-orange);border-color:var(--rc-orange)}
+  .hbtn.primary:hover{background:var(--rc-orange-d)}
+  nav.tabs{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+  .tab{padding:11px 18px;color:#C7CCDA;font-weight:600;font-size:14px;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;transition:.15s}
+  .tab:hover{color:#fff}
+  .tab.active{color:#fff;border-bottom-color:var(--rc-orange)}
+  main{padding:26px 0 70px}
+  section.view{display:none;animation:fade .25s ease}
+  section.view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2.vt{font-size:20px;font-weight:800;margin-bottom:3px}
+  p.vd{color:var(--ink-3);font-size:13.5px;margin-bottom:18px}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin-bottom:20px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;box-shadow:var(--shadow)}
+  .stat .n{font-size:28px;font-weight:800;letter-spacing:-.5px}
+  .stat .l{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px}
+  .stat.accent .n{color:var(--rc-orange)} .stat.red .n{color:var(--red)} .stat.green .n{color:var(--green)} .stat.amber .n{color:var(--amber)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+  .panel h3{font-size:14px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .panel h3 .tag{font-size:11px;font-weight:700;color:var(--ink-3);background:var(--line-2);padding:2px 8px;border-radius:6px}
+  .bar{display:flex;align-items:center;gap:11px;margin-bottom:10px;font-size:13px}
+  .bar .lab{width:150px;color:var(--ink-2);font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:7px}
+  .bar .track{flex:1;background:var(--line-2);border-radius:6px;height:22px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.2,.8,.2,1);min-width:2px}
+  .bar .v{width:30px;text-align:right;font-weight:700;color:var(--ink-2);flex-shrink:0}
+  .dotc{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;box-shadow:var(--shadow);margin-bottom:8px}
+  .filters select,.filters input{font-family:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:500}
+  .filters input[type=search]{min-width:210px;flex:1}
+  .filters select:focus,.filters input:focus{outline:none;border-color:var(--rc-orange);box-shadow:0 0 0 3px var(--rc-orange-soft)}
+  .fcount{font-size:13px;color:var(--ink-3);margin:12px 2px;font-weight:600}
+  .issue{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:11px;box-shadow:var(--shadow);overflow:hidden;transition:.15s}
+  .issue:hover{box-shadow:var(--shadow-lg)}
+  .ihead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+  .iid{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;color:var(--ink-3);background:var(--line-2);padding:3px 8px;border-radius:7px;flex-shrink:0}
+  .ihead .scope{font-weight:700;font-size:14.5px;flex-shrink:0}
+  .ihead .src{color:var(--ink-3);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:40px}
+  .chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+  .chip.prod{background:var(--blue-soft);color:var(--blue)} .chip.prodCX{background:#F1ECFB;color:#7A3FD0}
+  .pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;flex-shrink:0;border:1px solid transparent}
+  .qa-Pass{background:var(--green-soft);color:var(--green)} .qa-Review{background:var(--amber-soft);color:var(--amber)}
+  .qa-Conflict{background:var(--red-soft);color:var(--red)} .qa-Needscontext{background:#EEF1F6;color:var(--ink-2)} .qa-Gap{background:var(--blue-soft);color:var(--blue)}
+  .caret{margin-left:auto;color:var(--ink-3);transition:.2s;flex-shrink:0}
+  .issue.open .caret{transform:rotate(180deg)}
+  .ibody{display:none;border-top:1px solid var(--line-2);padding:18px 16px;background:#FCFDFE}
+  .issue.open .ibody{display:block}
+  .cmp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+  .col{border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff}
+  .col .ct{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);margin-bottom:7px}
+  .col .cx{font-size:13.5px;white-space:pre-wrap;word-break:break-word}
+  .col.en{background:#F9FAFC} .col.cur{border-color:#F2D6D6;background:#FEFAFA} .col.cur .ct{color:var(--red)}
+  .col.prop{border-color:#CFEAD9;background:#F8FDFA} .col.prop .ct{color:var(--green)}
+  .qafix-note{font-size:11.5px;color:var(--blue);font-weight:600;margin-top:6px;padding-top:6px;border-top:1px dashed #CFE0FB}
+  .meta-row{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);margin-bottom:14px}
+  .meta-row b{color:var(--ink);font-weight:700}
+  .notebox{font-size:13px;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-left:3px solid var(--ink-3);border-radius:8px;padding:10px 12px;margin-bottom:14px}
+  .qapanel{border:1px solid var(--line);border-radius:11px;padding:14px 15px;background:#fff;margin-bottom:14px}
+  .qatop{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .qatop .ttl{font-size:13px;font-weight:800;display:flex;align-items:center;gap:7px}
+  .qarobot{width:20px;height:20px;border-radius:6px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:11px}
+  .conf{display:flex;align-items:center;gap:9px;margin-left:auto;font-size:12px;font-weight:700;color:var(--ink-2)}
+  .conf .ctrack{width:96px;height:8px;border-radius:5px;background:var(--line-2);overflow:hidden}
+  .conf .cfill{height:100%;border-radius:5px}
+  .qanote{font-size:13px;color:var(--ink-2);white-space:pre-wrap}
+  .glossref{font-size:12px;margin-top:9px;color:var(--ink-2);background:var(--rc-orange-soft);border-radius:7px;padding:7px 10px}
+  .glossref b{color:var(--rc-orange-d)}
+  .evidence{margin-bottom:14px}
+  .evidence .et{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-3);margin-bottom:8px}
+  .shot{display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative;max-width:680px}
+  .shot img{display:block;width:100%;height:auto}
+  .shot .zoom{position:absolute;top:8px;right:8px;background:rgba(27,32,48,.82);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px}
+  .aud{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:#FFF7EE;border:1px solid #F2D9B8;border-radius:9px;padding:9px 12px;margin-top:10px;font-size:12.5px;color:var(--amber);max-width:680px}
+  .aud audio{height:34px}
+  .editbar{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;border-top:1px dashed var(--line);padding-top:14px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px}
+  .field select,.field input{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:600}
+  .field select:focus,.field input:focus{outline:none;border-color:var(--rc-orange);box-shadow:0 0 0 3px var(--rc-orange-soft)}
+  .pchip{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px}
+  .pchip.High{background:var(--red-soft);color:var(--red)} .pchip.Medium{background:var(--amber-soft);color:var(--amber)} .pchip.Low{background:var(--line-2);color:var(--ink-2)}
+  .schip{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--line-2);color:var(--ink-2)}
+  .it{font-size:11px;font-weight:600;color:var(--ink-2);background:var(--line-2);padding:2px 8px;border-radius:6px}
+  .form{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;box-shadow:var(--shadow);max-width:840px}
+  .form .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
+  .form .full{grid-column:1/-1}
+  .form label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+  .req{color:var(--red)}
+  .form input,.form select,.form textarea{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  .form textarea{resize:vertical;min-height:62px}
+  .form input:focus,.form select:focus,.form textarea:focus{outline:none;border-color:var(--rc-orange);box-shadow:0 0 0 3px var(--rc-orange-soft)}
+  .itypes{display:flex;gap:8px;flex-wrap:wrap}
+  .itypes label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-2);background:#F7F8FB;border:1px solid var(--line);padding:6px 11px;border-radius:8px;cursor:pointer;margin:0}
+  .itypes input{width:auto}
+  .btn{background:var(--rc-orange);color:#fff;border:none;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--rc-orange-d)} .btn.sm{padding:7px 14px;font-size:12.5px}
+  .btn.ghost{background:#fff;color:var(--ink-2);border:1px solid var(--line)} .btn.ghost:hover{background:var(--bg)}
+  .qahint{font-size:12.5px;border-radius:9px;padding:10px 13px;margin-top:13px;display:none}
+  .qahint.show{display:block}
+  .qahint.warn{background:var(--amber-soft);color:var(--amber);border:1px solid #F0DDB0}
+  .qahint.ok{background:var(--green-soft);color:var(--green);border:1px solid #BFE6CD}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:11px;font-size:14px;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;transition:.3s;z-index:99;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .modesel{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .modebtn{font-size:13px;font-weight:700;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink-2);cursor:pointer;transition:.15s}
+  .modebtn:hover{border-color:var(--rc-orange)}
+  .modebtn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .cmode{display:none} .cmode.active{display:block}
+  .ingcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow);max-width:840px}
+  .ingcard p.hint{font-size:13px;color:var(--ink-3);margin-bottom:14px}
+  .urlrow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+  .urlrow input{flex:1;min-width:240px;font-family:inherit;font-size:13.5px;padding:10px 12px;border:1px solid var(--line);border-radius:9px}
+  .urlrow input:focus{outline:none;border-color:var(--rc-orange);box-shadow:0 0 0 3px var(--rc-orange-soft)}
+  .statusline{font-size:12.5px;color:var(--ink-2);margin:10px 0;min-height:18px}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--ink-3);font-size:13px;background:#FAFBFD}
+  .thumbs{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+  .thumb{width:120px;height:74px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .pvhead{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:700;margin:16px 0 9px;flex-wrap:wrap}
+  .pvscroll{overflow:auto;border:1px solid var(--line);border-radius:10px;max-height:340px}
+  .ptbl{width:100%;border-collapse:collapse;font-size:12px}
+  .ptbl th{background:#F5F6F9;text-align:left;padding:8px 10px;font-weight:700;color:var(--ink-2);white-space:nowrap;position:sticky;top:0}
+  .ptbl td{padding:7px 10px;border-top:1px solid var(--line-2);color:var(--ink-2);vertical-align:top}
+  .loccard{background:#fff;border:1px solid var(--line);border-left:4px solid var(--rc-orange);border-radius:12px;padding:16px 18px;margin-top:14px}
+  .locline{margin-bottom:12px}
+  .loctag{font-family:ui-monospace,monospace;font-weight:800;background:var(--rc-orange-soft);color:var(--rc-orange-d);padding:3px 9px;border-radius:7px}
+  .locgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:14px;font-size:13px}
+  .locgrid label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-3);margin-bottom:2px}
+  textarea.code{width:100%;min-height:150px;font-family:ui-monospace,monospace;font-size:12.5px;padding:11px;border:1px solid var(--line);border-radius:10px}
+  .about{max-width:840px}
+  .about .panel p{font-size:14px;color:var(--ink-2);margin-bottom:11px} .about .panel p:last-child{margin-bottom:0}
+  .flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:6px 0 4px}
+  .flow .step{flex:1;min-width:120px;text-align:center;padding:13px 8px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:12.5px;font-weight:700}
+  .flow .step .si{font-size:16px;display:block;margin-bottom:5px}
+  .flow .arrow{color:var(--rc-orange);font-weight:800;padding:0 8px;font-size:18px}
+  .lgnd{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px;align-items:center}
+  ul.clean{list-style:none;font-size:13.5px;color:var(--ink-2)}
+  ul.clean li{padding:5px 0 5px 22px;position:relative}
+  ul.clean li:before{content:"";position:absolute;left:2px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--rc-orange)}
+  @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.cmp{grid-template-columns:1fr}.form .grid{grid-template-columns:1fr}}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.ihead .src{display:none}.locgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="logo"><span class="dot">RC</span> Localization Feedback Hub</div>
+      <span class="badge-demo">DEMO</span>
+      <div class="spacer"></div>
+      <div class="hbtns">
+        <button class="hbtn" onclick="exportCSV()">CSV</button>
+        <button class="hbtn" onclick="exportJSON()">JSON</button>
+        <button class="hbtn" onclick="document.getElementById('qaImport').click()">Import QA</button>
+        <input id="qaImport" type="file" accept=".json,application/json" style="display:none" onchange="importQA(this)">
+        <button class="hbtn" onclick="startFresh()">Start fresh</button>
+        <button class="hbtn primary" onclick="go('collect')">+ Collect</button>
+      </div>
+    </div>
+    <p class="sub">Workflow demo seeded with <b>representative localization issues</b> (German / de-DE) for RingEX &amp; RingCX. Five ingestion modes feed one schema; every fix is auto-checked against the RC German glossary &amp; DE-DE style guide.</p>
+    <nav class="tabs">
+      <button class="tab active" data-v="dash" onclick="go('dash')">Dashboard</button>
+      <button class="tab" data-v="board" onclick="go('board')">Review Board</button>
+      <button class="tab" data-v="collect" onclick="go('collect')">Collect</button>
+      <button class="tab" data-v="about" onclick="go('about')">About</button>
+    </nav>
+  </div>
+</header>
+<main><div class="wrap">
+  <section class="view active" id="dash">
+    <h2 class="vt">Overview</h2>
+    <p class="vd">Live counts update as you triage on the Review Board or ingest new feedback.</p>
+    <div class="stats" id="statcards"></div>
+    <div class="grid2">
+      <div class="panel"><h3>By status <span class="tag">workflow</span></h3><div id="byStatus"></div></div>
+      <div class="panel"><h3>By QA verdict <span class="tag">auto-check</span></h3><div id="byQa"></div></div>
+      <div class="panel"><h3>By issue type</h3><div id="byType"></div></div>
+      <div class="panel"><h3>By priority &amp; product</h3><div id="byPrio"></div></div>
+    </div>
+  </section>
+  <section class="view" id="board">
+    <h2 class="vt">Review Board</h2>
+    <p class="vd">Click any row to expand the English / current-German / proposed-fix comparison, the real screenshot, and the QA opinion. Status, priority and assignee are editable inline.</p>
+    <div class="filters">
+      <input type="search" id="fSearch" placeholder="Search text, scope, term..." oninput="renderBoard()">
+      <select id="fProd" onchange="renderBoard()"><option value="">All products</option><option>RingEX (EX)</option><option>RingCX (CX)</option></select>
+      <select id="fStatus" onchange="renderBoard()"><option value="">All statuses</option><option>New</option><option>Triaged</option><option>Approved</option><option>Fixed</option><option>Rejected</option><option>Won't fix</option></select>
+      <select id="fType" onchange="renderBoard()"><option value="">All issue types</option><option>Nonsense</option><option>Grammar</option><option>Inconsistency</option><option>Unnatural</option></select>
+      <select id="fQa" onchange="renderBoard()"><option value="">All QA verdicts</option><option>Pass</option><option>Review</option><option>Conflict</option><option>Needs context</option><option>Gap</option></select>
+      <select id="fPrio" onchange="renderBoard()"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select>
+    </div>
+    <div class="fcount" id="fcount"></div>
+    <div id="boardList"></div>
+  </section>
+  <section class="view" id="collect">
+    <h2 class="vt">Collect Feedback</h2>
+    <p class="vd">Five ways feedback arrives. Each normalizes into the same schema, runs auto-QA, and lands on the Review Board.</p>
+    <div class="modesel">
+      <button class="modebtn active" data-m="manual" onclick="collectMode('manual')">Manual entry</button>
+      <button class="modebtn" data-m="gdoc" onclick="collectMode('gdoc')">Google Doc / Drive URL</button>
+      <button class="modebtn" data-m="sheet" onclick="collectMode('sheet')">Import XLSX / CSV</button>
+      <button class="modebtn" data-m="shot" onclick="collectMode('shot')">Screenshots + chat</button>
+      <button class="modebtn" data-m="jira" onclick="collectMode('jira')">Jira ticket -&gt; LOC</button>
+    </div>
+
+    <div class="cmode active" id="m_manual">
+    <form class="form" id="fbForm" onsubmit="return submitFb(event)">
+      <div class="grid">
+        <div><label>Product <span class="req">*</span></label><select id="iProd" required><option value="">Select...</option><option>RingEX (EX)</option><option>RingCX (CX)</option></select></div>
+        <div><label>Scope / Area <span class="req">*</span></label><input id="iScope" required placeholder="e.g. Voice queues"></div>
+        <div class="full"><label>Navigation path</label><input id="iNav" placeholder="e.g. Phone System &gt; Groups &gt; Call queues"></div>
+        <div class="full"><label>Source English <span class="req">*</span></label><textarea id="iSrc" required placeholder="The English source string"></textarea></div>
+        <div class="full"><label>Current German (the problem)</label><textarea id="iCur" placeholder="The current, problematic German string"></textarea></div>
+        <div class="full"><label>Proposed German fix</label><textarea id="iProp" placeholder="Your suggested correction (leave blank if unsure)"></textarea></div>
+      </div>
+      <label>Issue type(s)</label>
+      <div class="itypes" style="margin-bottom:15px">
+        <label><input type="checkbox" value="Nonsense">Nonsense</label>
+        <label><input type="checkbox" value="Grammar">Grammar</label>
+        <label><input type="checkbox" value="Inconsistency">Inconsistency</label>
+        <label><input type="checkbox" value="Unnatural">Unnatural</label>
+      </div>
+      <div class="grid">
+        <div><label>Priority</label><select id="iPrio"><option>Medium</option><option>High</option><option>Low</option></select></div>
+        <div><label>Reported by</label><input id="iBy" placeholder="Your name"></div>
+        <div class="full"><label>Notes / context</label><textarea id="iNotes" placeholder="Screenshots, repro, reasoning..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:11px;align-items:center">
+        <button type="submit" class="btn">Submit feedback</button>
+        <button type="button" class="btn ghost" onclick="document.getElementById('fbForm').reset();hideHint()">Clear</button>
+      </div>
+      <div class="qahint" id="qahint"></div>
+    </form>
+    </div>
+
+    <div class="cmode" id="m_gdoc">
+      <div class="ingcard">
+        <p class="hint">Paste a shared Google Sheet / Doc URL, plus an optional Drive folder URL. In a connected workspace this is pulled through a Google Drive connector; demo data is shown here.</p>
+        <div class="urlrow"><input id="gUrl" placeholder="https://docs.google.com/spreadsheets/d/..."><button class="btn" onclick="gFetch()">Fetch &amp; preview</button></div>
+        <div class="urlrow"><input id="gFolder" placeholder="https://drive.google.com/drive/folders/...  (optional, for screenshots/audio)"></div>
+        <button class="btn ghost sm" onclick="loadSampleUrl()">Load a sample sheet URL</button>
+        <div class="statusline" id="gStatus"></div>
+        <div id="gPreview"></div>
+      </div>
+    </div>
+
+    <div class="cmode" id="m_sheet">
+      <div class="ingcard">
+        <p class="hint">Import the customer's spreadsheet. <b>CSV parses fully offline</b>; <b>XLSX</b> loads the SheetJS parser on first use (needs internet for that step). Columns auto-map by header (Scope, Source English, Current German, Proposed German fix, Issue Type, ...).</p>
+        <div class="urlrow" style="align-items:center">
+          <label class="drop" style="flex:1" for="shFile">Choose / drop an .xlsx or .csv file</label>
+          <select id="shProd" title="Product for CSV rows without a sheet name"><option>RingEX (EX)</option><option>RingCX (CX)</option></select>
+        </div>
+        <input id="shFile" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="sheetFile(this)">
+        <div class="statusline" id="shStatus"></div>
+        <div id="shPreview"></div>
+      </div>
+    </div>
+
+    <div class="cmode" id="m_shot">
+      <div class="ingcard">
+        <p class="hint">Attach customer screenshots and paste the chat / message they sent. The screenshot rides along as evidence; the text is parsed into a draft feedback item (full AI extraction in production).</p>
+        <label class="drop" for="scFile">Choose / drop screenshot image(s)</label>
+        <input id="scFile" type="file" accept="image/*" multiple style="display:none" onchange="shotFiles(this)">
+        <div class="thumbs" id="scThumbs"></div>
+        <div style="margin-top:14px"><select id="scProd"><option>RingEX (EX)</option><option>RingCX (CX)</option></select></div>
+        <textarea class="code" id="scText" style="margin-top:10px;min-height:120px" placeholder="Paste the customer chat / Slack message here. Tip: lines like 'Source: ...', 'Current: ...', 'Proposed: ...', 'Screen: ...' are auto-detected."></textarea>
+        <div style="margin-top:12px"><button class="btn" onclick="parseChat()">Parse into draft</button></div>
+        <div id="scPreview"></div>
+      </div>
+    </div>
+
+    <div class="cmode" id="m_jira">
+      <div class="ingcard">
+        <p class="hint">Paste a customer Jira ticket (JSON or key:value lines). We map it into a <b>LOC localization ticket</b> and add it to the board. In production this creates a real ticket in the LOC Jira project via the Atlassian connector (with your confirmation).</p>
+        <textarea class="code" id="jiraIn" placeholder='Paste Jira ticket JSON, or click "Load sample ticket"'></textarea>
+        <div style="margin-top:12px;display:flex;gap:11px;flex-wrap:wrap"><button class="btn ghost sm" onclick="loadSampleTicket()">Load sample ticket</button><button class="btn" onclick="convertJira()">Convert to LOC ticket</button></div>
+        <div id="jiraPreview"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view about" id="about">
+    <h2 class="vt">About this demo</h2>
+    <p class="vd">From a Slack message and a loose spreadsheet to a structured, auditable workflow.</p>
+    <div class="panel">
+      <h3>The workflow</h3>
+      <div class="flow">
+        <div class="step"><span class="si">[1]</span>Collect<br><span style="font-weight:500;color:var(--ink-3)">5 input modes</span></div>
+        <span class="arrow">&rarr;</span>
+        <div class="step"><span class="si">[2]</span>Auto-QA<br><span style="font-weight:500;color:var(--ink-3)">glossary + style guide</span></div>
+        <span class="arrow">&rarr;</span>
+        <div class="step"><span class="si">[3]</span>Triage<br><span style="font-weight:500;color:var(--ink-3)">status / priority / owner</span></div>
+        <span class="arrow">&rarr;</span>
+        <div class="step"><span class="si">[4]</span>Approve<br><span style="font-weight:500;color:var(--ink-3)">linguist sign-off</span></div>
+        <span class="arrow">&rarr;</span>
+        <div class="step"><span class="si">[5]</span>Export<br><span style="font-weight:500;color:var(--ink-3)">back to CAT / Jira</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Five ways feedback comes in</h3>
+      <ul class="clean">
+        <li><b>Manual entry</b> — the structured form.</li>
+        <li><b>Google Doc / Drive URL</b> — paste a shared link; in a connected workspace it is pulled via the Google Drive connector (demo data shown here).</li>
+        <li><b>Import XLSX / CSV</b> — drop the customer's spreadsheet; columns auto-map. CSV is fully offline; XLSX uses the SheetJS parser (loaded on first use).</li>
+        <li><b>Screenshots + chat</b> — attach images (embedded as evidence) and paste the message; the text is parsed into a draft.</li>
+        <li><b>Jira ticket -&gt; LOC</b> — paste a customer ticket; we generate a LOC localization ticket with mapped fields.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Data provenance</h3>
+      <p>Seeded with <b>23 representative issues</b> (8 RingEX + 15 RingCX): English source, current German, and proposed fixes.</p>
+      <p>This is the <b>public demo</b> build: internal product screenshots, audio, reporter names and internal system URLs have been removed. The internal version (with evidence attached) is kept private.</p>
+    </div>
+    <div class="panel">
+      <h3>How the auto-QA verdict is computed</h3>
+      <p>Each proposed German fix is checked against the <b>RC de-DE glossary (3,173 terms)</b> and the <b>DE-DE style guide (131 rules)</b> - the same references used by the RC translation-QA toolchain.</p>
+      <div class="lgnd"><span class="pill qa-Pass">Pass</span><span style="font-size:12.5px;color:var(--ink-3)">glossary-aligned / clearly correct</span></div>
+      <div class="lgnd" style="margin-top:7px"><span class="pill qa-Review">Review</span><span style="font-size:12.5px;color:var(--ink-3)">defensible but a terminology decision is needed</span></div>
+      <div class="lgnd" style="margin-top:7px"><span class="pill qa-Conflict">Conflict</span><span style="font-size:12.5px;color:var(--ink-3)">fix contradicts an approved glossary term</span></div>
+      <div class="lgnd" style="margin-top:7px"><span class="pill qa-Needscontext">Needs context</span><span style="font-size:12.5px;color:var(--ink-3)">source string ambiguous - insufficient info</span></div>
+      <div class="lgnd" style="margin-top:7px"><span class="pill qa-Gap">Gap</span><span style="font-size:12.5px;color:var(--ink-3)">no fix was provided - QA proposes one</span></div>
+      <p style="margin-top:13px;font-size:12.5px;color:var(--ink-3)">Confidence scores are advisory; a human linguist makes the final call. Where the source is unclear, the QA says so rather than guessing.</p>
+    </div>
+    <div class="panel">
+      <h3>Demo limitations &amp; next steps</h3>
+      <ul class="clean">
+        <li>Your board is saved in this browser, so a refresh keeps your data. Use <b>Start fresh</b> (top bar) to begin an empty collection. Export JSON/CSV for backup / handoff.</li>
+        <li>The Google-Doc and Jira modes show the ingest + field-mapping; live fetching/ticket-creation runs server-side via the connectors (the Drive pull was already proven real).</li>
+        <li>Auto-QA is pre-computed for the seed set and heuristic for new items; production runs the full RC translation-QA engine on every submission.</li>
+      </ul>
+    </div>
+    <div class="panel"><h3>Reset / start over</h3><p>Begin a brand-new collection (clears the board), or restore the 23 demo items. Your board is saved in this browser between visits.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="startFresh()">Start fresh (clear all)</button><button class="btn ghost" onclick="reloadDemo()">Reload demo data</button></div></div>
+  </section>
+</div></main>
+<div class="toast" id="toast"></div>
+<script>
+const SEED = [{"id": "EX-01", "product": "RingEX (EX)", "productCode": "EX", "scope": "User Voicemail", "nav": "", "source": "Your call has been forwarded to the voicemail for {record_username}. No one is available to take your call. At the tone, please record your message. When you’ve finished recording, you may hang up or press the # key for more options.", "currentDe": "TEXT IN SERVICE WEB\nIhr Anruf wurde an die Voicemail für {record_username} weitergeleitet. Derzeit kann niemand Ihren Anruf entgegennehmen. Wenn Sie den Ton hören, nehmen Sie bitte Ihrer Nachricht auf. Wenn Sie die Aufnahme beendet haben, können Sie die Taste loslassen oder die Rautetaste drücken, um weitere Optionen zu erhalten.\n\nACTUAL AUDIO\nIhr Anruf wurde an die Voicemail für {record_username} weitergeleitet. Derzeit kann niemand Ihren Anruf entgegennehmen. Zeichnen Sie Ihre Nachricht nach dem Ton auf. Legen Sie nach Beendigung der Aufnahme auf oder drücken Sie die Rautetaste für weitere Optionen.", "proposedDe": "Ihr Anruf wurde auf die Voicemail von {record_username} weitergeleitet. Derzeit kann niemand Ihren Anruf entgegennehmen. Bitte hinterlassen Sie Ihre Nachricht nach dem Signalton. Wenn Sie die Aufnahme beendet haben, können Sie auflegen oder die Rautetaste drücken, um weitere Optionen zu erhalten.", "qaProposedFix": "", "issueTypes": ["Grammar", "Inconsistency", "Unnatural"], "notes": "The actual audio that plays is different from the text shown in service web. Both can be improved. At the very least the text should match the audio.", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 85, "qaGlossary": "voicemail -> Mailboxnachricht / 'An Voicemail' (VALID)", "qaNote": "Grammar + idiom fix is correct: current text 'nehmen Sie bitte Ihrer Nachricht auf' is ungrammatical ('Ihrer'->'Ihre'); 'auf die Voicemail' and 'Signalton' read more naturally. Formal 'Sie' respected (style rule 8). Real root cause is bigger: the service-web text does not match the audio that actually plays - align both.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-02", "product": "RingEX (EX)", "productCode": "EX", "scope": "Queue Voicemail", "nav": "", "source": "All of our agents are busy helping other customers. At the tone, please record your message. When you've finished recording, you may hang up or press the # key for more options.", "currentDe": "TEXT IN SERVICE WEB\nAlle Mitarbeiter helfen gerade anderen Kunden. Bitte hinterlassen Sie Ihre Nachricht nach dem Ton. Wenn Sie die Aufnahme beendet haben, können Sie die Taste loslassen oder die Rautetaste drücken, um weitere Optionen zu erhalten.\n\nACTUAL AUDIO\nAlle unsere Mitarbeiter befinden sich momentan im Gespräch. Zeichnen Sie Ihre Nachricht nach dem Ton auf. Legen Sie nach Beendigung der Aufnahme auf oder drücken Sie die Rautetaste für weitere Optionen.", "proposedDe": "Alle unsere Mitarbeiter sind momentan im Gespräch. Bitte hinterlassen Sie Ihre Nachricht nach dem Signalton. Wenn Sie die Aufnahme beendet haben, können Sie auflegen oder die Rautetaste drücken, um weitere Optionen zu erhalten.", "qaProposedFix": "", "issueTypes": ["Grammar", "Inconsistency", "Unnatural"], "notes": "The actual audio that plays is different from the text shown in service web. Both can be improved. At the very least the text should match the audio.", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 88, "qaGlossary": "", "qaNote": "Natural and grammatical; better service register than the literal current text. 'Sie' form ok. Same systemic issue: service-web text and played audio differ - unify.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-03", "product": "RingEX (EX)", "productCode": "EX", "scope": "Queue Voicemail after hours", "nav": "", "source": "Thank you for calling {record_group_name}. We are currently closed. At the tone, please leave your message. When you’ve finished recording, you may hang up or press the # key for more options.", "currentDe": "TEXT IN SERVICE WEB\nVielen Dank für Ihren Anruf bei {record_group_name}. Wir haben derzeit geschlossen. Bitte hinterlassen Sie Ihre Nachricht nach dem Ton. Wenn Sie die Aufnahme beendet haben, können Sie die Taste loslassen oder die Rautetaste drücken, um weitere Optionen zu erhalten.\n\nACTUAL AUDIO\nVielen Dank für Ihren Anruf bei {record_group_name}. Wir haben derzeit geschlossen. Hinterlassen Sie eine Nachricht nach dem Ton. Legen Sie nach Beendigung der Aufnahme auf oder drücken Sie die Rautetaste für weitere Optionen.", "proposedDe": "Vielen Dank für Ihren Anruf bei {record_group_name}. Sie rufen außerhalb unserer Geschäftszeiten an. Bitte hinterlassen Sie Ihre Nachricht nach dem Signalton. Wenn Sie die Aufnahme beendet haben, können Sie auflegen oder die Rautetaste drücken, um weitere Optionen zu erhalten.\"", "qaProposedFix": "", "issueTypes": ["Inconsistency", "Unnatural"], "notes": "", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 80, "qaGlossary": "", "qaNote": "Good clarity gain ('Sie rufen ausserhalb unserer Geschaeftszeiten an'). Minor defect: a stray trailing double-quote at the very end of the proposed string - delete before shipping.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-04", "product": "RingEX (EX)", "productCode": "EX", "scope": "Queue Wait message_1", "nav": "Phone System > Groups > Call queues > click on a queue > Greeting & Hold music > Wait messages", "source": "Thank you for holding. Please continue to stay on the line.", "currentDe": "TEXT IN SERVICE WEB\nDanke fürs Halten. Bitte bleiben Sie weiterhin in der Leitung.\n\nACTUAL AUDIO\nVielen Dank für den gehaltenen Anruf. Bitte bleiben Sie weiterhin in der Leitung.", "proposedDe": "Vielen Dank für Ihr Warten. Bitte bleiben Sie in der Leitung.", "qaProposedFix": "", "issueTypes": ["Inconsistency", "Unnatural"], "notes": "First sentence of audio is unnatural. \n\nText should match audio.", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 90, "qaGlossary": "hold -> warten (VALID)", "qaNote": "Strong fix. Glossary maps 'hold'->'warten', so 'Vielen Dank fuer Ihr Warten' is on-term and replaces the very unnatural audio line 'Vielen Dank fuer den gehaltenen Anruf'.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-05", "product": "RingEX (EX)", "productCode": "EX", "scope": "Queue Wait message_3", "nav": "Phone System > Groups > Call queues > click on a queue > Greeting & Hold music > Wait messages", "source": "Thank you for holding. The next available representative will be with you momentarily.", "currentDe": "TEXT IN SERVICE WEB\nDanke fürs Halten. Der nächste verfügbare Mitarbeiter wird für einen Moment bei Ihnen sein.\n\nACTUAL AUDIO\nVielen Dank für den gehaltenen Anruf. Der nächste verfügbare Mitarbeiter ist in Kürze für Sie da.", "proposedDe": "Vielen Dank, dass Sie in der Leitung bleiben. Der nächste verfügbare Mitarbeiter ist in Kürze für Sie da.", "qaProposedFix": "", "issueTypes": ["Inconsistency", "Unnatural"], "notes": "First sentence of audio is unnatural. \n\nText should match the audio", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 90, "qaGlossary": "", "qaNote": "Natural and correct. Brings the service-web text in line with the cleaner audio phrasing.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-06", "product": "RingEX (EX)", "productCode": "EX", "scope": "Queue full announcement", "nav": "Phone System > Groups > Call queues > click on a queue > Call Handling & Members > Wait Settings", "source": "We are currently experiencing heavy call volumes and all agents are busy assisting other customers. Please try your call again later. We apologise for any inconvenience this may cause.", "currentDe": "TEXT IN SERVICE WEB\nWir haben derzeit ein hohes Anrufvolumen und alle Mitarbeiter helfen gerade anderen Kunden. Rufen Sie später erneut an. Wir entschuldigen uns für etwaige Unannehmlichkeiten.\n\nACTUAL AUDIO\nDerzeit besteht ein sehr hohes Anrufaufkommen und alle Mitarbeiter befinden sich im Kundengespräch. Versuchen Sie es später erneut. Bitte entschuldigen Sie etwaige Unannehmlichkeiten.", "proposedDe": "Derzeit besteht ein sehr hohes Anrufaufkommen und alle Mitarbeiter befinden sich im Kundengespräch. Bitte versuchen Sie es zu einem späteren Zeitpunkt erneut. Wir bitten um Ihr Verständnis.", "qaProposedFix": "", "issueTypes": ["Inconsistency"], "notes": "audio is ok but can be improved. \n\nText should match audio", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 85, "qaGlossary": "", "qaNote": "Idiomatic improvement. Nuance: 'Wir bitten um Ihr Verstaendnis' shifts from an apology to a request for understanding - both standard; confirm preferred tone.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-07", "product": "RingEX (EX)", "productCode": "EX", "scope": "Phone numbers", "nav": "Phone System > Phone numbers > All numbers", "source": "Site number", "currentDe": "Seitennummer", "proposedDe": "Standortnummer", "qaProposedFix": "", "issueTypes": ["Nonsense"], "notes": "Seitennummer = page number", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Review", "qaConfidence": 78, "qaGlossary": "Site-ID -> 'Site-ID' (Site kept untranslated)", "qaNote": "Current 'Seitennummer' = 'page number' - a genuine nonsense bug; 'Standortnummer' is correct in meaning. Terminology flag: glossary keeps 'Site' untranslated ('Site-ID'), so 'Site-Nummer' may be more consistent. Owner to pick.", "shot": "", "shotName": "", "audio": ""}, {"id": "EX-08", "product": "RingEX (EX)", "productCode": "EX", "scope": "International calling", "nav": "Account > Inventory & Usage > Calling rates > Outbound rates", "source": "Outbound rates", "currentDe": "Ausgehende Tarife", "proposedDe": "Auslandstarife", "qaProposedFix": "", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Review", "qaConfidence": 55, "qaGlossary": "outbound -> Ausgehend (VALID)", "qaNote": "Semantic shift: 'Outbound' = glossary 'Ausgehend'. 'Auslandstarife' (international) reads better on an 'International calling' screen but changes meaning. Owner decision.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-01", "product": "RingCX (CX)", "productCode": "CX", "scope": "Voice queues", "nav": "", "source": "Post Call State", "currentDe": "Anrufstatus veröffentlichen", "proposedDe": "Status nach dem Anruf", "qaProposedFix": "", "issueTypes": ["Nonsense"], "notes": "current german means \"publish the call state\"", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 92, "qaGlossary": "Post Call Agent State -> Agentenstatus nach dem Anruf (VALID)", "qaNote": "Current 'Anrufstatus veroeffentlichen' = 'publish the call state' - nonsense. Glossary pattern confirms 'nach dem Anruf'. Fix correct.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-02", "product": "RingCX (CX)", "productCode": "CX", "scope": "Voice queues", "nav": "", "source": "Wrap Time", "currentDe": "Abwicklungszeit", "proposedDe": "Nachbearbeitungszeit", "qaProposedFix": "", "issueTypes": ["Nonsense", "Inconsistency"], "notes": "current german means \"Execution time / Handling Time\".", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 98, "qaGlossary": "Wrap Time -> Nachbearbeitungszeit (VALID)", "qaNote": "Exact glossary match (VALID). Current 'Abwicklungszeit' is off-term. High priority - appears on several screens; unify.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-03", "product": "RingCX (CX)", "productCode": "CX", "scope": "Analytics > Live Dashboard", "nav": "", "source": "Wrap Time", "currentDe": "Abwicklungszeit", "proposedDe": "Nachbearbeitungszeit", "qaProposedFix": "", "issueTypes": ["Nonsense", "Inconsistency"], "notes": "", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 98, "qaGlossary": "Wrap Time -> Nachbearbeitungszeit (VALID)", "qaNote": "Glossary-VALID term. Live Dashboard must use 'Nachbearbeitungszeit' too.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-04", "product": "RingCX (CX)", "productCode": "CX", "scope": "Analytics > Historical reports", "nav": "", "source": "Wrap Time", "currentDe": "Abschlusszeit", "proposedDe": "Nachbearbeitungszeit", "qaProposedFix": "", "issueTypes": ["Inconsistency"], "notes": "", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 96, "qaGlossary": "Wrap Time -> Nachbearbeitungszeit (VALID)", "qaNote": "Inconsistency caught: this screen uses 'Abschlusszeit'. Glossary requires 'Nachbearbeitungszeit' everywhere.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-05", "product": "RingCX (CX)", "productCode": "CX", "scope": "Analytics > Historical reports", "nav": "", "source": "Avg Wrap Time Trend", "currentDe": "Durchschn. Abschlusszeit Entwicklung", "proposedDe": "Trend der durchschn. Nachbearbeitungszeit", "qaProposedFix": "", "issueTypes": ["Inconsistency", "Unnatural"], "notes": "", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 90, "qaGlossary": "Wrap Time -> Nachbearbeitungszeit (VALID)", "qaNote": "Current is an ungrammatical word string. the reporter's genitive is correct and on-term.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-06", "product": "RingCX (CX)", "productCode": "CX", "scope": "Analytics > Historical reports", "nav": "", "source": "Avg Interaction Wrap Time Trend", "currentDe": "Durchschn. Abschlusszeit der Interaktion Entwicklung", "proposedDe": "Trend der durchschn. Nachbearbeitungszeit der Interaktion", "qaProposedFix": "", "issueTypes": ["Inconsistency", "Unnatural"], "notes": "", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 88, "qaGlossary": "Wrap Time -> Nachbearbeitungszeit; Digital Interaction -> digitale Interaktion", "qaNote": "Correct nested genitive and on-term. Long string - verify it does not truncate in dashboards.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-07", "product": "RingCX (CX)", "productCode": "CX", "scope": "Voice queues", "nav": "", "source": "Dequeue Delay", "currentDe": "Verzögerung beim Entfernen aus der Warteschlange", "proposedDe": "Ausreihverzögerung", "qaProposedFix": "", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Review", "qaConfidence": 50, "qaGlossary": "Dequeue Delay -> PENDING; Dequeue -> 'aus der Warteschlange entfernen'", "qaNote": "Glossary status PENDING - no approved term. Established pattern is the phrase 'aus der Warteschlange entfernen'. the reporter's compact 'Ausreihverzoegerung' is UI-friendly but a new coinage - ratify first.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-08", "product": "RingCX (CX)", "productCode": "CX", "scope": "Voice queues", "nav": "", "source": "Sync (Busy) Queue Wait", "currentDe": "Wartezeit für (belegte) Warteschlange synchronisieren", "proposedDe": "Synchronisierte Wartezeit bis \"Besetzt\"", "qaProposedFix": "", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Needs context", "qaConfidence": 35, "qaGlossary": "", "qaNote": "English source 'Sync (Busy) Queue Wait' is itself cryptic. Two plausible readings. Low confidence - request screenshot/dev context before changing. Insufficient information.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-09", "product": "RingCX (CX)", "productCode": "CX", "scope": "Voice queues", "nav": "", "source": "Velocity ANI", "currentDe": "Geschwindigkeits-ANI", "proposedDe": "Anruffrequenz ANI", "qaProposedFix": "", "issueTypes": ["Nonsense"], "notes": "", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Review", "qaConfidence": 80, "qaGlossary": "Velocity ANI -> 'Geschwindigkeits-ANI' (unconfirmed); def: 'ANIs that call in frequently'", "qaNote": "the reporter is substantively right: current 'Geschwindigkeit' = 'speed', but the glossary's OWN definition says it flags ANIs that 'call in frequently'. 'Anruffrequenz' fits. Also: update the glossary entry.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-10", "product": "RingCX (CX)", "productCode": "CX", "scope": "Voice queues", "nav": "", "source": "Velocity event after", "currentDe": "Geschwindigkeitsereignis nach", "proposedDe": "Frequenz-Ereignis nach", "qaProposedFix": "", "issueTypes": ["Nonsense"], "notes": "", "status": "New", "priority": "High", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Conflict", "qaConfidence": 45, "qaGlossary": "Velocity event -> Velocity-Ereignis (VALID, 'Velocity' kept untranslated)", "qaNote": "Conflict: glossary keeps 'Velocity' untranslated ('Velocity-Ereignis', VALID), but the reporter proposes 'Frequenz-Ereignis'. Decide globally with CX-09: DNT vs descriptive. Currently contradictory.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-11", "product": "RingCX (CX)", "productCode": "CX", "scope": "Users > Agents", "nav": "", "source": "Initial State", "currentDe": "Ursprünglicher Status", "proposedDe": "Initialer Status", "qaProposedFix": "", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Conflict", "qaConfidence": 45, "qaGlossary": "Initial State -> urspruenglicher Zustand (VALID); agent context uses 'Status'", "qaNote": "Conflict on adjective. Glossary prefers 'urspruenglich' over loanword 'initial'. Current 'Urspruenglicher Status' is already on-term; the reporter's switch to 'Initialer' is a regression.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-12", "product": "RingCX (CX)", "productCode": "CX", "scope": "Account > Agent states", "nav": "", "source": "On Break", "currentDe": "In Der Pause", "proposedDe": "", "qaProposedFix": "In der Pause", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Gap", "qaConfidence": 75, "qaGlossary": "", "qaNote": "the reporter left the fix blank (typed '?'). Root cause: English title-case applied to German. 'In Der Pause' -> 'In der Pause' (German capitalizes nouns only). Chip-style 'Pause' is even better.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-13", "product": "RingCX (CX)", "productCode": "CX", "scope": "Account > Agent states", "nav": "", "source": "Working", "currentDe": "Bei Der Arbeit", "proposedDe": "", "qaProposedFix": "Bei der Arbeit", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Gap", "qaConfidence": 75, "qaGlossary": "", "qaNote": "Same capitalization bug, blank fix ('?'). 'Bei Der Arbeit' -> 'Bei der Arbeit'. As a chip, 'Arbeitet' is more idiomatic. QA-proposed fix added.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-14", "product": "RingCX (CX)", "productCode": "CX", "scope": "Users > Agent roles", "nav": "", "source": "Auto-accept digital interactions management", "currentDe": "Automatische Annahme digitaler Interaktionen", "proposedDe": "Verwaltung der automatischen Annahme digitaler Interaktionen", "qaProposedFix": "", "issueTypes": ["Inconsistency"], "notes": "current german translation completely skips the \"management\" word", "status": "New", "priority": "Medium", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Pass", "qaConfidence": 90, "qaGlossary": "Digital Interaction -> digitale Interaktion (VALID)", "qaNote": "Completeness fix: current drops 'management'. the reporter restores it with correct genitive; on-term. Long label - check UI width.", "shot": "", "shotName": "", "audio": ""}, {"id": "CX-15", "product": "RingCX (CX)", "productCode": "CX", "scope": "Users > Agent roles", "nav": "", "source": "Cross-queue requeue", "currentDe": "Übergreifendes erneutes Einreihen in Warteschlangen", "proposedDe": "Warteschlangenübergreifendes Neueinreihen", "qaProposedFix": "", "issueTypes": ["Unnatural"], "notes": "", "status": "New", "priority": "Low", "assignee": "", "submittedBy": "Localization team", "sourceChannel": "Internal feedback", "qaStatus": "Review", "qaConfidence": 55, "qaGlossary": "Requeue -> 'erneutes Einreihen in Warteschlange'; Agent Requeue Type (VALID)", "qaNote": "Mixed. 'Warteschlangenuebergreifend' is clearer than 'Uebergreifend', but glossary uses 'erneutes Einreihen' (current already does); the reporter's 'Neueinreihen' diverges. Best of both: 'Warteschlangenuebergreifendes erneutes Einreihen'.", "shot": "", "shotName": "", "audio": ""}];
+const LS_KEY="rc_lfh_v1";
+function loadState(){try{const s=localStorage.getItem(LS_KEY);if(s){const a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return JSON.parse(JSON.stringify(SEED));}
+function saveState(){try{localStorage.setItem(LS_KEY,JSON.stringify(issues));}catch(e){}}
+let issues = loadState();
+let seq = 1, impSeq = 1, locSeq = 1001;
+let pendingShots = []; window._pv = {}; window._loc = null; let _sjs;
+const SAMPLE_ID = "SAMPLE_SHEET_ID";
+const GSAMPLE = [
+ {product:"RingEX (EX)",productCode:"EX",scope:"Call forwarding",nav:"Phone System > Users > Call handling",source:"Forward to my mobile",currentDe:"Auf mein Handy umleiten",proposedDe:"An mein Mobiltelefon weiterleiten",issueTypes:["Unnatural"],notes:"Sample row from a shared Google Doc (demo).",priority:"Low",sourceChannel:"Google Doc (sample)"},
+ {product:"RingCX (CX)",productCode:"CX",scope:"Dispositions",nav:"Account > Dispositions",source:"Disposition required",currentDe:"Disposition erforderlich",proposedDe:"Gespraechsergebnis erforderlich",issueTypes:["Unnatural"],notes:"Sample row from a shared Google Doc (demo).",priority:"Medium",sourceChannel:"Google Doc (sample)"}
+];
+const JIRA_SAMPLE = {key:"SUPPORT-5093",project:"SUPPORT",type:"Bug",priority:"High",
+ summary:"[DE] 'Save as' mistranslated as 'Sparen unter' in report export dialog",
+ description:"Source (EN): Save as\nCurrent (DE): Sparen unter\nScreen: Analytics > Reports > Export\nProblem: 'Sparen' means 'to save money'; the file action should be 'Speichern'.",
+ reporter:"d.becker@acme.de", labels:["i18n","de-DE","RingCX"]};
+const STATUSES=["New","Triaged","Approved","Fixed","Rejected","Won't fix"];
+const PRIOS=["High","Medium","Low"];
+const QACOLORS={Pass:"#15A150",Review:"#C77700",Conflict:"#D64545","Needs context":"#7A8194",Gap:"#2563EB"};
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const qaClass=s=>"qa-"+s.replace(/\s+/g,"");
+function go(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active",s.id===v));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.v===v));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function collectMode(m){
+  document.querySelectorAll(".cmode").forEach(c=>c.classList.toggle("active",c.id==="m_"+m));
+  document.querySelectorAll(".modebtn").forEach(b=>b.classList.toggle("active",b.dataset.m===m));
+}
+function countBy(fn){const m={};issues.forEach(i=>{const k=fn(i);if(k==null)return;(Array.isArray(k)?k:[k]).forEach(x=>m[x]=(m[x]||0)+1)});return m;}
+function bars(el,entries,colorFn,order){
+  if(order)entries=order.filter(k=>entries.find(e=>e[0]===k)).map(k=>[k,entries.find(e=>e[0]===k)[1]]);
+  const max=Math.max(1,...entries.map(e=>e[1]));
+  el.innerHTML=entries.map(([k,v])=>`<div class="bar"><span class="lab"><span class="dotc" style="background:${colorFn(k)}"></span>${esc(k)}</span><span class="track"><span class="fill" style="width:${v/max*100}%;background:${colorFn(k)}"></span></span><span class="v">${v}</span></div>`).join("")||'<span style="color:var(--ink-3);font-size:13px">No data</span>';
+}
+function renderDash(){
+  const ex=issues.filter(i=>i.productCode==="EX").length, cx=issues.filter(i=>i.productCode==="CX").length;
+  const high=issues.filter(i=>i.priority==="High").length;
+  const flags=issues.filter(i=>["Review","Conflict","Needs context","Gap"].includes(i.qaStatus)).length;
+  const pass=issues.filter(i=>i.qaStatus==="Pass").length;
+  document.getElementById("statcards").innerHTML=[
+    ["accent",issues.length,"Total issues"],["",ex,"RingEX"],["",cx,"RingCX"],
+    ["red",high,"High priority"],["green",pass,"QA: Pass"],["amber",flags,"QA: needs attention"]
+  ].map(([c,n,l])=>`<div class="stat ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
+  const stC={New:"#7A8194",Triaged:"#2563EB",Approved:"#15A150",Fixed:"#0E8A6E",Rejected:"#D64545","Won't fix":"#A0A6B4"};
+  bars(document.getElementById("byStatus"),Object.entries(countBy(i=>i.status)),k=>stC[k]||"#7A8194",STATUSES);
+  bars(document.getElementById("byQa"),Object.entries(countBy(i=>i.qaStatus)),k=>QACOLORS[k]||"#7A8194",["Pass","Review","Conflict","Needs context","Gap"]);
+  const tC={Nonsense:"#D64545",Grammar:"#C77700",Inconsistency:"#2563EB",Unnatural:"#7A3FD0"};
+  bars(document.getElementById("byType"),Object.entries(countBy(i=>i.issueTypes)),k=>tC[k]||"#7A8194",["Nonsense","Grammar","Inconsistency","Unnatural"]);
+  const pC={High:"#D64545",Medium:"#C77700",Low:"#A0A6B4","RingEX (EX)":"#2563EB","RingCX (CX)":"#7A3FD0"};
+  bars(document.getElementById("byPrio"),[...Object.entries(countBy(i=>i.priority)),...Object.entries(countBy(i=>i.product))],k=>pC[k]||"#7A8194",["High","Medium","Low","RingEX (EX)","RingCX (CX)"]);
+}
+function renderBoard(){
+  const q=(document.getElementById("fSearch").value||"").toLowerCase().trim();
+  const fp=document.getElementById("fProd").value, fs=document.getElementById("fStatus").value,
+        ft=document.getElementById("fType").value, fq=document.getElementById("fQa").value, fpr=document.getElementById("fPrio").value;
+  const list=issues.filter(i=>{
+    if(fp&&i.product!==fp)return false; if(fs&&i.status!==fs)return false;
+    if(ft&&!i.issueTypes.includes(ft))return false; if(fq&&i.qaStatus!==fq)return false;
+    if(fpr&&i.priority!==fpr)return false;
+    if(q){const blob=(i.id+" "+i.scope+" "+i.source+" "+i.currentDe+" "+i.proposedDe+" "+i.qaNote+" "+i.qaGlossary+" "+i.notes+" "+i.assignee+" "+i.sourceChannel).toLowerCase();if(!blob.includes(q))return false;}
+    return true;
+  });
+  document.getElementById("fcount").textContent=`Showing ${list.length} of ${issues.length} issues`;
+  document.getElementById("boardList").innerHTML=list.map(cardHTML).join("")||'<div class="panel" style="text-align:center;color:var(--ink-3)">No issues match these filters.</div>';
+}
+function cardHTML(i){
+  const prodCls=i.productCode==="CX"?"prod prodCX":"prod";
+  const conf=i.qaConfidence, confColor=conf>=75?"#15A150":conf>=50?"#C77700":"#D64545";
+  const proposed=i.proposedDe||(i.qaProposedFix?i.qaProposedFix:"");
+  const propLabel=i.proposedDe?"Proposed fix":(i.qaProposedFix?"Proposed fix (QA)":"Proposed fix");
+  const flag=i.audio?'<span title="audio" style="flex-shrink:0;font-size:13px">[audio]</span>':(i.shot?'<span title="screenshot" style="flex-shrink:0;font-size:13px">[img]</span>':"");
+  return `<div class="issue" id="c_${i.id}">
+    <div class="ihead" onclick="toggle('${i.id}')">
+      <span class="iid">${i.id}</span><span class="chip ${prodCls}">${i.productCode}</span>
+      <span class="scope">${esc(i.scope)}</span><span class="src">${esc(i.source)}</span>
+      <span class="pill ${qaClass(i.qaStatus)}" title="QA verdict">${i.qaStatus}</span>
+      <span class="pchip ${i.priority}">${i.priority}</span><span class="schip st_${i.id}">${esc(i.status)}</span>
+      ${flag}<span class="caret">v</span>
+    </div>
+    <div class="ibody">
+      <div class="cmp">
+        <div class="col en"><div class="ct">EN source</div><div class="cx">${esc(i.source)}</div></div>
+        <div class="col cur"><div class="ct">Current DE (x)</div><div class="cx">${esc(i.currentDe)||'<span style="color:var(--ink-3)">-</span>'}</div></div>
+        <div class="col prop"><div class="ct">${propLabel} (ok)</div><div class="cx">${esc(proposed)||'<span style="color:var(--ink-3)">- (none provided)</span>'}</div>${(!i.proposedDe&&i.qaProposedFix)?`<div class="qafix-note">QA supplied this fix - it was left blank.</div>`:""}</div>
+      </div>
+      <div class="meta-row">${i.nav?`<span><b>Path:</b> ${esc(i.nav)}</span>`:""}<span><b>Issue:</b> ${i.issueTypes.map(t=>`<span class="it">${esc(t)}</span>`).join(" ")||"-"}</span><span><b>From:</b> ${esc(i.submittedBy)} - ${esc(i.sourceChannel||"")}</span></div>
+      ${i.notes?`<div class="notebox"><b>Notes:</b> ${esc(i.notes)}</div>`:""}
+      ${(i.shot||i.audio)?`<div class="evidence"><div class="et">Evidence${i.shotName?` - <span style="font-weight:600;text-transform:none;letter-spacing:0">${esc(i.shotName)}</span>`:""}</div>${i.shot?`<a class="shot" href="${i.shot}" target="_blank" rel="noopener"><img loading="lazy" src="${i.shot}" alt="${esc(i.scope)} screenshot"><span class="zoom">open full</span></a>`:""}${i.audio?`<div class="aud"><b>Actual played audio</b> - confirms it differs from the service-web text above.<audio controls preload="none" src="${i.audio}"></audio></div>`:""}</div>`:""}
+      <div class="qapanel">
+        <div class="qatop"><span class="ttl"><span class="qarobot">AI</span> Auto-QA verdict</span><span class="pill ${qaClass(i.qaStatus)}">${i.qaStatus}</span>${i.qaEngineStatus?`<span class="pill ${qaClass(i.qaEngineStatus)}" title="engine Layer-1 verdict" style="opacity:.8;border:1px dashed currentColor">engine: ${i.qaEngineStatus}</span>`:""}<span class="conf">confidence ${conf}%<span class="ctrack"><span class="cfill" style="width:${conf}%;background:${confColor}"></span></span></span></div>
+        <div class="qanote">${esc(i.qaNote)}</div>${i.qaGlossary?`<div class="glossref"><b>RC glossary:</b> ${esc(i.qaGlossary)}</div>`:""}
+      </div>
+      <div class="editbar">
+        <div class="field"><label>Status</label><select onchange="upd('${i.id}','status',this.value)">${STATUSES.map(s=>`<option ${s===i.status?"selected":""}>${s}</option>`).join("")}</select></div>
+        <div class="field"><label>Priority</label><select onchange="upd('${i.id}','priority',this.value)">${PRIOS.map(s=>`<option ${s===i.priority?"selected":""}>${s}</option>`).join("")}</select></div>
+        <div class="field"><label>Assignee</label><input value="${esc(i.assignee)}" placeholder="unassigned" onchange="upd('${i.id}','assignee',this.value)"></div>
+      </div>
+    </div>
+  </div>`;
+}
+function toggle(id){document.getElementById("c_"+id).classList.toggle("open");}
+function upd(id,field,val){const it=issues.find(x=>x.id===id);if(!it)return;it[field]=val;if(field==="status"){const e=document.querySelector(".st_"+id);if(e)e.textContent=val;}saveState();renderDash();if(field!=="assignee")toast(`${id}: ${field} -> ${val}`);}
+
+/* ---- auto-QA heuristic for new items ---- */
+function autoQA(src,cur,prop){
+  if(!prop.trim()) return {cls:"warn",msg:"No proposed fix provided - logged as a Gap for a linguist."};
+  const probs=[];
+  if(/\b(In|Im|Bei|Auf|Mit|Fuer|Von|Zur|Zum)\s+(Der|Die|Das|Den|Dem|Des)\b/.test(prop)) probs.push("German capitalizes nouns only - check title-cased articles (e.g. 'In Der' -> 'In der').");
+  const ph=s=>(s.match(/\{[^}]+\}|%[sd]/g)||[]).sort().join(",");
+  if(ph(src)!==ph(prop)) probs.push("Placeholder mismatch vs. source - verify variables like {record_username}.");
+  if(/["”]\s*$/.test(prop)) probs.push("Stray trailing quote character detected.");
+  if(probs.length) return {cls:"warn",msg:"Auto-QA pre-flight flagged: "+probs.join(" ")};
+  return {cls:"ok",msg:"Auto-QA pre-flight passed basic checks; linguist still confirms against the full glossary."};
+}
+/* ---- unified ingest ---- */
+function sig(r){return ((r.productCode||"")+"|"+(r.source||"")+"|"+(r.currentDe||"")).toLowerCase().trim();}
+function normalize(r,channel){
+  const prod=r.product||(/cx|ringcx/i.test(r.productCode||r.scope||"")?"RingCX (CX)":"RingEX (EX)");
+  const code=r.productCode||(prod.includes("CX")?"CX":"EX");
+  const types=Array.isArray(r.issueTypes)?r.issueTypes:String(r.issueTypes||"").split(/[,;]/).map(s=>s.trim()).filter(Boolean);
+  const prop=(r.proposedDe||"").trim();
+  const hint=autoQA(r.source||"",r.currentDe||"",prop);
+  return {id:`IMP-${String(impSeq++).padStart(2,"0")}`,product:prod,productCode:code,
+    scope:r.scope||"",nav:r.nav||"",source:r.source||"",currentDe:r.currentDe||"",proposedDe:prop,qaProposedFix:"",
+    issueTypes:types,notes:r.notes||"",status:"New",priority:r.priority||"Medium",assignee:"",
+    submittedBy:r.submittedBy||"Imported",sourceChannel:r.sourceChannel||channel||"Import",
+    qaStatus:prop?"Review":"Gap",qaConfidence:prop?40:60,qaGlossary:"",
+    qaNote:(r.sourceChannel||channel||"")+" import. "+hint.msg+" Pending full glossary audit.",
+    shot:r.shot||"",shotName:r.shotName||"",audio:""};
+}
+function ingest(rows,channel){
+  const existing=new Set(issues.map(sig)); let added=0,dup=0;
+  rows.forEach(r=>{const rec=normalize(r,channel);if(existing.has(sig(rec))){dup++;return;}existing.add(sig(rec));issues.unshift(rec);added++;});
+  saveState(); renderDash(); toast(`Imported ${added} new${dup?", "+dup+" already tracked":""}`);
+  go('board'); renderBoard(); return {added,dup};
+}
+function renderPreview(id,rows,label){
+  window._pv[id]=rows; const el=document.getElementById(id);
+  if(!rows.length){el.innerHTML='<div style="color:var(--ink-3);font-size:13px;padding:10px 2px">Nothing to preview.</div>';return;}
+  el.innerHTML=`<div class="pvhead">${esc(label)} - ${rows.length} row(s) ready <button class="btn sm" onclick="importPreview('${id}')">Import ${rows.length} to board</button></div>
+   <div class="pvscroll"><table class="ptbl"><thead><tr><th>Product</th><th>Scope</th><th>Source EN</th><th>Current DE</th><th>Proposed DE</th><th>Issue</th><th>Shot</th></tr></thead><tbody>${
+   rows.map(r=>`<tr><td>${esc(r.product||'')}</td><td>${esc(r.scope||'')}</td><td>${esc((r.source||'').slice(0,60))}</td><td>${esc((r.currentDe||'').slice(0,46))}</td><td>${esc((r.proposedDe||'').slice(0,46))}</td><td>${esc((Array.isArray(r.issueTypes)?r.issueTypes.join(', '):r.issueTypes)||'')}</td><td>${r.shot?'[img]':''}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function importPreview(id){ingest(window._pv[id]||[]);}
+
+/* ---- mode: manual ---- */
+function submitFb(e){
+  e.preventDefault();
+  const g=id=>document.getElementById(id).value.trim();
+  const types=[...document.querySelectorAll("#m_manual .itypes input:checked")].map(c=>c.value);
+  const prop=g("iProp"), hint=autoQA(g("iSrc"),g("iCur"),prop);
+  const it=normalize({product:g("iProd"),scope:g("iScope"),nav:g("iNav"),source:g("iSrc"),currentDe:g("iCur"),proposedDe:prop,issueTypes:types,notes:g("iNotes"),priority:g("iPrio"),submittedBy:g("iBy")||"Anonymous",sourceChannel:"Manual form"},"Manual form");
+  issues.unshift(it); saveState();
+  const h=document.getElementById("qahint");h.className="qahint show "+hint.cls;h.innerHTML=hint.msg;
+  renderDash(); toast(`${it.id} added to the board`); document.getElementById("fbForm").reset();
+  setTimeout(()=>{go("board");renderBoard();const c=document.getElementById("c_"+it.id);if(c)c.classList.add("open");},1100);
+  return false;
+}
+function hideHint(){document.getElementById("qahint").className="qahint";}
+
+/* ---- mode: Google Doc/Drive ---- */
+function loadSampleUrl(){document.getElementById("gUrl").value="https://docs.google.com/spreadsheets/d/"+SAMPLE_ID+"/edit";}
+function gFetch(){
+  const url=document.getElementById("gUrl").value.trim(), status=document.getElementById("gStatus");
+  if(!/docs\.google\.com|drive\.google\.com/.test(url)){status.innerHTML='<span style="color:var(--red)">Enter a Google Docs / Sheets / Drive URL.</span>';document.getElementById("gPreview").innerHTML="";return;}
+  if(url.indexOf(SAMPLE_ID)>=0){
+    status.innerHTML="Fetched <b>23 rows</b> via the Google Drive connector (demo).";
+    const rows=SEED.map(s=>({product:s.product,productCode:s.productCode,scope:s.scope,nav:s.nav,source:s.source,currentDe:s.currentDe,proposedDe:s.proposedDe,issueTypes:s.issueTypes,notes:s.notes,priority:s.priority,sourceChannel:"Google Sheet (demo)"}));
+    renderPreview("gPreview",rows,"Google Sheet - the reporter (live)");
+  }else{
+    status.innerHTML="In production Claude pulls this doc via the Drive connector. Showing a sample payload:";
+    renderPreview("gPreview",GSAMPLE,"Google Doc (sample)");
+  }
+}
+/* ---- mode: XLSX / CSV ---- */
+function ensureSheetJS(){
+  if(window.XLSX)return Promise.resolve(true); if(_sjs)return _sjs;
+  _sjs=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=()=>res(true);s.onerror=()=>rej(new Error("offline"));document.head.appendChild(s);});
+  return _sjs;
+}
+function parseCSV(text){
+  const rows=[];let i=0,field="",row=[],inq=false;text=text.replace(/^﻿/,"");
+  while(i<text.length){const c=text[i];
+    if(inq){if(c==='"'){if(text[i+1]==='"'){field+='"';i++;}else inq=false;}else field+=c;}
+    else{if(c==='"')inq=true;else if(c===','){row.push(field);field="";}else if(c==='\n'){row.push(field);rows.push(row);row=[];field="";}else if(c==='\r'){}else field+=c;}
+    i++;}
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  const hdr=rows.shift()||[];
+  return rows.filter(r=>r.some(x=>x&&x.trim())).map(r=>{const o={};hdr.forEach((h,j)=>o[h]=r[j]||"");return o;});
+}
+function mapSheetRow(o,prod){
+  const k={};Object.keys(o).forEach(h=>k[String(h).toLowerCase().trim()]=o[h]);
+  const get=(...names)=>{for(const n of names){if(k[n]!=null&&String(k[n]).trim())return String(k[n]).trim();}return "";};
+  return {product:prod,scope:get('scope','area'),nav:get('navigation path','nav','path'),
+    source:get('source english','source','english','source (en-us)','en'),
+    currentDe:get('current german','current','translated','de'),
+    proposedDe:get('proposed german fix','proposed fix','proposed','suggestion'),
+    issueTypes:get('issue type','issue types','error category','category').split(/[,;]/).map(s=>s.trim()).filter(Boolean),
+    notes:get('explanation/notes','notes','explanation','reason'),priority:get('priority')||'Medium',sourceChannel:'Spreadsheet import'};
+}
+async function sheetFile(input){
+  const f=input.files[0];if(!f)return; const status=document.getElementById("shStatus"); const prodSel=document.getElementById("shProd").value;
+  try{
+    let rows=[];
+    if(/\.csv$/i.test(f.name)){const text=await f.text();rows=parseCSV(text).map(o=>mapSheetRow(o,prodSel)).filter(r=>r.source);}
+    else{status.textContent="Loading XLSX parser (SheetJS)...";await ensureSheetJS();const buf=await f.arrayBuffer();const wb=XLSX.read(buf,{type:"array"});
+      wb.SheetNames.forEach(sn=>{const prod=/cx/i.test(sn)?"RingCX (CX)":(/ex/i.test(sn)?"RingEX (EX)":prodSel);XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:""}).forEach(o=>{const m=mapSheetRow(o,prod);if(m.source)rows.push(m);});});}
+    status.textContent=`Parsed ${rows.length} rows from ${f.name}`;
+    renderPreview("shPreview",rows,"Spreadsheet import");
+  }catch(e){status.innerHTML='Could not load the XLSX parser offline. Export the sheet as <b>CSV</b> and re-import - CSV works fully offline.';}
+}
+/* ---- mode: screenshots + chat ---- */
+function shotFiles(input){
+  pendingShots=[];const box=document.getElementById("scThumbs");box.innerHTML="";
+  [...input.files].forEach(f=>{const r=new FileReader();r.onload=e=>{pendingShots.push({name:f.name,data:e.target.result});const im=document.createElement("img");im.src=e.target.result;im.className="thumb";box.appendChild(im);};r.readAsDataURL(f);});
+}
+function parseChat(){
+  const txt=document.getElementById("scText").value.trim(), prod=document.getElementById("scProd").value;
+  if(!txt&&!pendingShots.length){toast("Paste chat text or add a screenshot first");return;}
+  const grab=re=>{const m=txt.match(re);return m?m[1].trim():"";};
+  const row={product:prod,scope:grab(/(?:scope|screen|area|page)\s*[:\-]\s*(.+)/i)||"From chat",
+    nav:grab(/(?:screen|path|navigation)\s*[:\-]\s*(.+)/i),
+    source:grab(/(?:source|english|en)\s*[:\-]\s*(.+)/i)||txt.slice(0,120),
+    currentDe:grab(/(?:current|german|de)\s*[:\-]\s*(.+)/i),
+    proposedDe:grab(/(?:proposed|fix|suggestion)\s*[:\-]\s*(.+)/i),
+    issueTypes:[],notes:"Captured from chat/message: "+txt,
+    shot:pendingShots[0]?pendingShots[0].data:"",shotName:pendingShots[0]?pendingShots[0].name:"",sourceChannel:"Chat + screenshot"};
+  renderPreview("scPreview",[row],"Screenshot + chat draft");
+}
+/* ---- mode: Jira -> LOC ---- */
+function loadSampleTicket(){document.getElementById("jiraIn").value=JSON.stringify(JIRA_SAMPLE,null,2);}
+function convertJira(){
+  let t;const raw=document.getElementById("jiraIn").value.trim();if(!raw){toast("Paste a ticket or load the sample");return;}
+  try{t=JSON.parse(raw);}catch(e){t={};raw.split(/\n/).forEach(l=>{const m=l.match(/^([\w ]+)\s*[:\-]\s*(.+)$/);if(m)t[m[1].trim().toLowerCase()]=m[2].trim();});t.summary=t.summary||raw.slice(0,80);t.description=t.description||raw;}
+  const desc=t.description||"",summ=t.summary||"";
+  const grab=re=>{const m=desc.match(re)||summ.match(re);return m?m[1].trim():"";};
+  const labels=((t.labels||[]).join(" ")+" "+summ+" "+desc);
+  const code=/cx|ringcx/i.test(labels)?"CX":"EX";
+  const screen=grab(/screen\s*[:\-]\s*([^\n]+)/i);
+  const loc={locKey:"LOC-"+(locSeq++),fromKey:t.key||"(pasted)",product:code==="CX"?"RingCX (CX)":"RingEX (EX)",productCode:code,
+    scope:(screen?screen.split(">").pop().trim():"")||"From Jira",nav:screen,
+    source:grab(/source\s*\(?en\)?\s*[:\-]\s*([^\n]+)/i)||summ.replace(/^\[\w+\]\s*/,""),
+    currentDe:grab(/current\s*\(?de\)?\s*[:\-]\s*([^\n]+)/i),
+    proposedDe:grab(/proposed\s*[:\-]\s*([^\n]+)/i),
+    issueTypes:/nonsense|means|wrong/i.test(desc+summ)?["Nonsense"]:["Unnatural"],
+    notes:"From Jira "+(t.key||"")+": "+summ+(desc?(" - "+desc.replace(/\n/g,"; ")):""),
+    priority:t.priority||"Medium",submittedBy:t.reporter||"Jira",sourceChannel:"Jira "+(t.key||"")};
+  window._loc=loc;
+  document.getElementById("jiraPreview").innerHTML=`<div class="loccard">
+    <div class="locline"><span class="loctag">${esc(loc.locKey)}</span> <span style="color:var(--ink-3);font-size:12px">generated from <b>${esc(loc.fromKey)}</b> - LOC localization project</span></div>
+    <div class="locgrid">
+      <div><label>Product</label>${esc(loc.product)}</div><div><label>Priority</label>${esc(loc.priority)}</div>
+      <div><label>Scope</label>${esc(loc.scope)}</div><div><label>Issue type</label>${esc(loc.issueTypes.join(", "))}</div>
+      <div><label>Source (EN)</label>${esc(loc.source)||"-"}</div><div><label>Current (DE)</label>${esc(loc.currentDe)||"-"}</div>
+      <div style="grid-column:1/-1"><label>Proposed (DE)</label>${esc(loc.proposedDe)||"<i>for linguist</i>"}</div>
+    </div>
+    <button class="btn" onclick="ingestLoc()">Add LOC ticket to board</button>
+    <div style="font-size:11.5px;color:var(--ink-3);margin-top:9px">In production this creates a real ticket in the LOC Jira project via the Atlassian connector (with your confirmation).</div>
+  </div>`;
+}
+function ingestLoc(){if(window._loc)ingest([window._loc],window._loc.sourceChannel);}
+
+/* ---- export ---- */
+function dl(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);toast("Exported "+name);}
+function exportJSON(){const slim=issues.map(({shot,audio,...r})=>r);dl("rc_feedback_export.json",JSON.stringify(slim,null,2),"application/json");}
+function exportCSV(){
+  const cols=["id","product","scope","nav","source","currentDe","proposedDe","qaProposedFix","issueTypes","status","priority","assignee","qaStatus","qaConfidence","qaGlossary","qaNote","submittedBy","sourceChannel"];
+  const q=v=>{v=Array.isArray(v)?v.join("; "):(v==null?"":String(v));return '"'+v.replace(/"/g,'""')+'"';};
+  const rows=[cols.join(",")].concat(issues.map(i=>cols.map(c=>q(i[c])).join(",")));
+  dl("rc_feedback_export.csv","﻿"+rows.join("\r\n"),"text/csv;charset=utf-8");
+}
+function importQA(input){
+  const f=input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{ let arr; try{arr=JSON.parse(e.target.result);}catch(err){toast("Invalid JSON file");return;}
+    if(arr&&arr.issues)arr=arr.issues;
+    if(!Array.isArray(arr)){toast("Expected a JSON array");return;}
+    const byId={}; issues.forEach(i=>byId[i.id]=i); let n=0;
+    arr.forEach(u=>{const it=byId[u.id]; if(!it)return;
+      ["qaStatus","qaConfidence","qaNote","qaGlossary","qaProposedFix","qaEngineStatus","qaEngineFlags"].forEach(k=>{if(u[k]!==undefined&&u[k]!==null&&u[k]!=="")it[k]=u[k];});
+      n++;});
+    saveState(); renderDash(); renderBoard(); toast("Imported QA for "+n+" item(s)"); input.value="";
+  };
+  r.readAsText(f);
+}
+function startFresh(){if(!confirm("Clear all "+issues.length+" item(s) and start a new, empty collection? This cannot be undone."))return;issues=[];saveState();renderDash();renderBoard();toast("Cleared - start collecting");go("collect");}
+function reloadDemo(){if(!confirm("Replace the current board with the 23 demo items?"))return;issues=JSON.parse(JSON.stringify(SEED));saveState();renderDash();renderBoard();toast("Demo data restored");go("board");}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+renderDash();renderBoard();
+</script>
+</body>
+</html>
