@@ -1,0 +1,10 @@
+# Local-only maintenance tooling — must NOT be published.
+# (verify_public_clean.ps1 lists internal scrub-terms, so it is itself "internal".)
+verify_public_clean.ps1
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+*.tmp
